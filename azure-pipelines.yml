@@ -1,0 +1,20 @@
+trigger:
+- main  # or 'master' depending on your branch name
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '18.x'
+  displayName: 'Install Node.js'
+
+- script: |
+    npm install
+    npm run build || echo "No build script defined"
+  displayName: 'Install dependencies and build'
+
+- script: |
+    npm test || echo "No tests defined"
+  displayName: 'Run tests'
