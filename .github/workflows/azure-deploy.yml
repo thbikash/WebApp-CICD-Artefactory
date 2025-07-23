@@ -41,3 +41,10 @@ jobs:
         with:
           app-name: WebApp-CICD-Agile
           package: release.zip
+
+      - name: Upload release.zip
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-package
+          path: release.zip
+    
