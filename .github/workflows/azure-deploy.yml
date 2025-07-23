@@ -19,7 +19,7 @@ jobs:
           node-version: '20.x'  # Matches Azure runtime
 
       - name: Install dependencies
-        run: npm install --production  # Only install needed packages
+        run: npm ci  # Only install needed packages
 
       - name: Zip the app (including node_modules, excluding .git)
         run: |
