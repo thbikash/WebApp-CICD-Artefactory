@@ -1,4 +1,8 @@
-"scripts": {
-  "test": "echo \"Running test...\" && exit 0"
+{
+  "name": "webapp-cicd-agile",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo \"Running tests...\" && exit 0"
+  }
 }
 
