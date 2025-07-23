@@ -28,7 +28,7 @@ jobs:
 
       - name: Zip the app (including node_modules, excluding .git)
         run: |
-          zip -r release.zip .
+          zip -r release.zip . -x ".git/*" ".github/*" "release.zip"
 
       - name: Login to Azure
         uses: azure/login@v1
