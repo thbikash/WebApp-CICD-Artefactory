@@ -1,4 +1,4 @@
-name: Node.js CI/CD to Azure Web App
+name: Build and Deploy Node.js App to Azure Web App
 
 on:
   push:
@@ -10,23 +10,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+    - name: Checkout source code
+      uses: actions/checkout@v2
 
-    - name: Setup Node
-      uses: actions/setup-node@v4
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
       with:
-        node-version: '20'
+        node-version: '18.x'
 
-    - name: Install Dependencies
+    - name: Install dependencies
       run: npm install
 
-    - name: Zip App
+    - name: Zip the app
       run: zip -r release.zip .
 
-    - name: Azure WebApp Deploy
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'WebApp-CICD-Agile'
-        publish-profile: ${{ secrets.AZURE_CREDENTIALS }}
+        app-name: WebApp-CICD-Agile   # your actual app name in Azure
         package: release.zip
