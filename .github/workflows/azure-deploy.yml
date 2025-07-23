@@ -16,13 +16,14 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18.x'  # Or '20.x' if you switch to Node 20
+          node-version: '20.x'  # Matches Azure runtime
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --production  # Only install needed packages
 
       - name: Zip the app (including node_modules, excluding .git)
-        run: zip -r release.zip . -x ".git/*" ".github/*" "release.zip"
+        run: |
+          zip -r release.zip . -x ".git/*" ".github/*" "release.zip"
 
       - name: Login to Azure
         uses: azure/login@v1
@@ -32,5 +33,5 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
-          app-name: WebApp-CICD-Agile  # Your Azure Web App name
+          app-name: WebApp-CICD-Agile
           package: release.zip
