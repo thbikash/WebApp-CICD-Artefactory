@@ -1,16 +1,21 @@
-name: Build and Deploy Node.js App to Azure Web App
+name: Deploy Node.js App to Azure Web App
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["Node.js CI"]
+    types:
+      - completed
 
 jobs:
-  build-and-deploy:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }} 
     runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-      - name: Checkout source code
+      - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Set up Node.js
@@ -23,7 +28,7 @@ jobs:
 
       - name: Zip the app (including node_modules, excluding .git)
         run: |
-          zip -r release.zip . -x ".git/*" ".github/*" "release.zip"
+          zip -r release.zip .
 
       - name: Login to Azure
         uses: azure/login@v1
@@ -31,6 +36,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy to Azure Web App
+        id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
           app-name: WebApp-CICD-Agile
