@@ -26,7 +26,11 @@ jobs:
     - name: Create Build Artifact (.tar)
       run: |
         mkdir -p output
-        tar -czvf output/webapp-${{ github.run_number }}.tar.gz *
+        mkdir staging
+        cp -r * staging/
+        tar -czvf output/webapp-${{ github.run_number }}.tar.gz -C staging .
+        rm -rf staging
+
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
@@ -36,4 +40,4 @@ jobs:
    
 
     - name: Build success
-      run: echo "✅ Build completed"
+      run: echo "✅ Build complete"
