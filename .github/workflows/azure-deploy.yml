@@ -28,7 +28,7 @@ jobs:
       #     core.setOutput('run_id', run_id_to_deploy);
 
       - name: Install GitHub CLI
-        uses: cli/gh-action@v2
+        uses: cli/gh-action@v4
 
 
       # - name: Download Artifact
