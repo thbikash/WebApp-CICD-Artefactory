@@ -27,7 +27,8 @@ jobs:
       run: |
         mkdir -p output
         mkdir staging
-        cp -r * staging/
+        cd staging/
+        cp -r * .
         tar -czvf output/webapp-${{ github.run_number }}.tar.gz -C staging .
         rm -rf staging
 
