@@ -2,6 +2,12 @@ name: Deploy Node.js App to Azure Web App from Artefactory
 
 on:
   workflow_dispatch:
+    # You might want to add inputs here, e.g., to manually specify a run_id
+    # inputs:
+    #   build_run_id:
+    #     description: 'ID of the build workflow run to deploy'
+    #     required: false
+    #     type: string
 
 jobs:
   deploy:
@@ -11,14 +17,56 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
+      - name: Find latest successful build workflow run
+        uses: actions/github-script@v6
+        id: get_build_run
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const workflowName = 'Node.js CI'; // Match the name of your build workflow
+            let run_id_to_deploy = null;
+
+            // Check if a run_id was provided via workflow_dispatch input
+            // if (github.event.inputs && github.event.inputs.build_run_id) {
+            //   run_id_to_deploy = github.event.inputs.build_run_id;
+            //   console.log(`Using provided run_id: ${run_id_to_deploy}`);
+            // } else {
+              // Otherwise, find the latest successful run
+              const response = await github.rest.actions.listWorkflowRunsForRepo({
+                owner,
+                repo,
+                workflow_id: workflowName,
+                status: 'success',
+                branch: 'main', // Assuming your build runs on main branch
+              });
+
+              if (response.data.workflow_runs.length > 0) {
+                run_id_to_deploy = response.data.workflow_runs[0].id;
+                console.log(`Found latest successful run ID: ${run_id_to_deploy}`);
+              } else {
+                core.setFailed(`No successful workflow runs found for workflow: ${workflowName} on branch main.`);
+                return;
+              }
+            // }
+
+            core.setOutput('run_id', run_id_to_deploy);
+
       - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
           name: webapp-artifact
           path: .
+          run-id: ${{ steps.get_build_run.outputs.run_id }} # Use the run_id from the previous step
 
       - name: Extract and Deploy
         run: |
           tar -xzvf webapp-*.tar.gz
           echo "Deploying to Azure App Service"
-          az webapp deploy --resource-group DevOpsLearning --name WebApp-CICD-Agile --src-path . --type zip --restart true    
+          # Ensure you have your Azure login step before this for az CLI to work
+          # Example:
+          # - name: Azure Login
+          #   uses: azure/login@v1
+          #   with:
+          #     creds: ${{ secrets.AZURE_CREDENTIALS }} # Store your Azure SP credentials as a secret
+
+          az webapp deploy --resource-group DevOpsLearning --name WebApp-CICD-Agile --src-path . --type zip --restart true
