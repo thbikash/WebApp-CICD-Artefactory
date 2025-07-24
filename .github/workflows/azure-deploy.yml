@@ -47,9 +47,15 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}   
 
-      - name: Extract and Deploy
-        run: |
+      - name: Extract tar file
+        run:
           tar -xzvf downloaded/webapp-*.tar.gz
+
+      - name: Zip for Azure
+        run: zip -r webapp.zip .
+
+      - name: Deploying to Azure App Sevice  
+        run:
           echo "Deploying to Azure App Service"
           az webapp deploy \
             --resource-group DevOpsLearning \
