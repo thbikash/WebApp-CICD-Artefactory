@@ -41,6 +41,11 @@ jobs:
 
       - name: List Downloaded Files
         run: ls -lh downloaded
+      
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}   
 
       - name: Extract and Deploy
         run: |
