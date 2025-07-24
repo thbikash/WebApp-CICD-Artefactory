@@ -24,6 +24,7 @@ jobs:
       run: npm test
 
     - name: Create Build Artifact (.tar)
+      shell: bash
       run: |
         mkdir -p output
         mkdir -p staging
