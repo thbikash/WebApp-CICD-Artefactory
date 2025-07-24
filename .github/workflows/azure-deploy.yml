@@ -12,6 +12,9 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read # <-- Add this line
     environment:
       name: production
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
