@@ -26,11 +26,11 @@ jobs:
     - name: Create Build Artifact (.tar)
       run: |
         mkdir -p output
-        mkdir staging
-        cd staging/
-        cp -r * .
+        mkdir -p staging
+        cp -r !(staging|output) staging/
         tar -czvf output/webapp-${{ github.run_number }}.tar.gz -C staging .
         rm -rf staging
+
 
 
     - name: Upload Artifact
