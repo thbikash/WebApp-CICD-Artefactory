@@ -1,11 +1,11 @@
-name: Deploy Node.js App to Azure Web App from Artefactory
+name: Deploy Node.js App to Azure Web App from Artifact
 
 on:
   workflow_dispatch:
     inputs:
       build_run_id:
         description: 'ID of the build workflow run to deploy'
-        required: true # Make this required for testing
+        required: true
         type: string
 
 jobs:
@@ -14,42 +14,38 @@ jobs:
     permissions:
       contents: read
       actions: read
+
     environment:
       name: production
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-      # Temporarily remove the github-script step to directly pass the run-id
-      # - name: Find latest successful build workflow run
-      #   uses: actions/github-script@v6
-      #   id: get_build_run
-      #   with:
-      #     # ... script ...
-      #     core.setOutput('run_id', run_id_to_deploy);
-
       - name: Install GitHub CLI
-        uses: cli/gh-action@v4
+        run: |
+          sudo apt-get update
+          sudo apt-get install gh -y
 
+      - name: Authenticate GitHub CLI
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "GitHub CLI authenticated"
 
-      # - name: Download Artifact
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     name: webapp-artifact
-      #     path: .
-      #     run-id: ${{ github.event.inputs.build_run_id }} # Use the manually provided input
-
-      - name: Download artifact from CI run
+      - name: Download Artifact from CI
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir downloaded
           gh run download ${{ github.event.inputs.build_run_id }} -n webapp-artifact -D downloaded
 
+      - name: List Downloaded Files
+        run: ls -lh downloaded
 
-      - name: Verify Download
-        run: ls -l downloaded
-
-      # ... (rest of your deployment steps) ...
       - name: Extract and Deploy
         run: |
-          tar -xzvf webapp-*.tar.gz
+          tar -xzvf downloaded/webapp-*.tar.gz
           echo "Deploying to Azure App Service"
-          az webapp deploy --resource-group DevOpsLearning --name WebApp-CICD-Agile --src-path . --type zip --restart true
+          az webapp deploy \
+            --resource-group DevOpsLearning \
+            --name WebApp-CICD-Agile \
+            --src-path . \
+            --type zip \
+            --restart true
