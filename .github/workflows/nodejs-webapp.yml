@@ -32,6 +32,8 @@ jobs:
         cp -r !(staging|output) staging/
         tar -czvf output/webapp-${{ github.run_number }}.tar.gz -C staging .
         rm -rf staging
+        echo "Contents of output directory:" # Debugging line
+        ls -l output/                      # Debugging line 
 
 
 
