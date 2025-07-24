@@ -1,4 +1,4 @@
-name: Deploy Node.js App to Azure Web App
+name: Deploy Node.js App to Azure Web App from Artefactory
 
 on:
   workflow_run:
@@ -8,43 +8,21 @@ on:
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }} 
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     environment:
       name: production
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
         with:
-          node-version: '20.x'  # Matches Azure runtime
+          name: webapp-artifact
+          path: .
 
-      - name: Install dependencies
-        run: npm ci  # Only install needed packages
-
-      - name: Zip the app (including node_modules, excluding .git)
+      - name: Extract and Deploy
         run: |
-          zip -r release.zip . -x ".git/*" ".github/*" "release.zip"
-
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Deploy to Azure Web App
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: WebApp-CICD-Agile
-          package: release.zip
-
-      - name: Upload release.zip
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-package
-          path: release.zip
-    
+          tar -xzvf webapp-*.tar.gz
+          echo "Deploying to Azure App Service"
+          az webapp deploy --resource-group DevOpsLearning --name WebApp-CICD-Agile --src-path . --type zip --restart true    
