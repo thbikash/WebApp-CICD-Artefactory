@@ -27,15 +27,25 @@ jobs:
       #     # ... script ...
       #     core.setOutput('run_id', run_id_to_deploy);
 
-      - name: Download Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: webapp-artifact
-          path: .
-          run-id: ${{ github.event.inputs.build_run_id }} # Use the manually provided input
+      - name: Install GitHub CLI
+        uses: cli/gh-action@v2
+
+
+      # - name: Download Artifact
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: webapp-artifact
+      #     path: .
+      #     run-id: ${{ github.event.inputs.build_run_id }} # Use the manually provided input
+
+      - name: Download artifact from CI run
+        run: |
+          mkdir downloaded
+          gh run download ${{ github.event.inputs.build_run_id }} -n webapp-artifact -D downloaded
+
 
       - name: Verify Download
-        run: ls -l .
+        run: ls -l downloaded
 
       # ... (rest of your deployment steps) ...
       - name: Extract and Deploy
