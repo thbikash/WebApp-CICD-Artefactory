@@ -1,7 +1,7 @@
 {
   "name": "webapp-cicd-Artefactory",
   "version": "1.0.0",
-  "description": "A sample Node.js app deployed via CI/CD with Artefactory",
+  "description": "A sample Node.js app deployed via CI/CD with Artefactory Version 1.0.0",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
