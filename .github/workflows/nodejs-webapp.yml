@@ -15,35 +15,49 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '18' # Use your desired Node.js version
 
-    - name: Install dependencies
+    - name: Install dependencies (for CI testing/linting)
       run: npm ci
 
     - name: Run tests
       run: npm test
 
-    - name: Create Build Artifact (.tar)
+    - name: Create Lean Build Tarball (Source Code Only)
       shell: bash
       run: |
         mkdir -p output
         mkdir -p staging
-        shopt -s extglob
-        cp -r !(staging|output) staging/
+
+        # Copy all files and directories EXCEPT node_modules, .git, .github, etc.
+        # This requires careful use of rsync or find/cp with exclusions.
+        # rsync is generally more robust for this. Make sure rsync is available on runner.
+        # It's usually pre-installed on ubuntu-latest.
+        rsync -av \
+          --exclude='node_modules/' \
+          --exclude='.git/' \
+          --exclude='.github/' \
+          --exclude='.gitignore' \
+          --exclude='*.env' \
+          --exclude='output/' \
+          --exclude='staging/' \
+          . staging/ # Copy everything from current dir to staging/
+
+        # Now, create the tarball from the staging directory
         tar -czvf output/webapp-${{ github.run_number }}.tar.gz -C staging .
+
+        # Clean up staging directory
         rm -rf staging
+
         echo "Contents of output directory:" # Debugging line
-        ls -l output/                      # Debugging line 
-
-
+        ls -l output/                      # Debugging line
 
     - name: Upload .tar.gz artifact
       uses: actions/upload-artifact@v4
       with:
-        name: webapp-artifact
+        name: webapp-artifact # Use a consistent name, run_id is handled by download step
         path: output/webapp-${{ github.run_number }}.tar.gz
-
-      
+        retention-days: 1 # How long to keep the artifact in GitHub Actions
 
     - name: Build success
-      run: echo "✅ Build complete"
+      run: echo "✅ Build complete. Artifact 'webapp-artifact' uploaded."
