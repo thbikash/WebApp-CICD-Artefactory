@@ -58,7 +58,7 @@ jobs:
         run:
           echo "Deploying to Azure App Service"
           az webapp deploy \
-            --resource-group DevOpsLearning \
+            --resource-group Development-RG \
             --name WebApp-CICD-Agile \
             --src-path . \
             --type zip \
