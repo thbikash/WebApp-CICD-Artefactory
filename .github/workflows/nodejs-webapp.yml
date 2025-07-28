@@ -33,7 +33,6 @@ jobs:
         # This requires careful use of rsync or find/cp with exclusions.
         # rsync is generally more robust for this. Make sure rsync is available on runner.
         # It's usually pre-installed on ubuntu-latest.
-
         rsync -av \
           --exclude='node_modules/' \
           --exclude='.git/' \
@@ -47,18 +46,11 @@ jobs:
         # Now, create the tarball from the staging directory
         tar -czvf output/webapp-${{ github.run_number }}.tar.gz -C staging .
 
-        echo "Listing contents of staging directory before tar:"
-        ls -lR staging/ # List recursively to see all files
-        echo "Size of staging directory:"
-        du -sh staging/ # Check the size
-
         # Clean up staging directory
         rm -rf staging
 
         echo "Contents of output directory:" # Debugging line
         ls -l output/                      # Debugging line
-
-        
 
     - name: Upload .tar.gz artifact
       uses: actions/upload-artifact@v4
