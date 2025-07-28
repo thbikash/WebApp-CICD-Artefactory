@@ -14,6 +14,7 @@ jobs:
     permissions:
       contents: read
       actions: read
+      id-token: write # <--- CRUCIAL FOR OIDC AUTHENTICATION
 
     environment:
       name: production
@@ -42,24 +43,28 @@ jobs:
       - name: List Downloaded Files
         run: ls -lh downloaded
       
-      - name: Azure Login
+      - name: Azure Login (using OIDC)
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}   
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          # Remove the 'creds' line if you are switching to OIDC.
+          # If AZURE_CREDENTIALS was a Service Principal JSON, you can keep it,
+          # but OIDC is preferred for GitHub Actions.
 
       - name: Extract tar file
         run:
           tar -xzvf downloaded/webapp-*.tar.gz
 
       - name: Zip for Azure
+        # Ensure your application's deployable content is at the root of the current directory
+        # after extraction. If it's in a subfolder (e.g., 'dist'), you might need to
+        # zip that specific subfolder: zip -r webapp.zip ./dist
         run: zip -r webapp.zip .
 
-      - name: Deploying to Azure App Sevice  
+      - name: Deploying to Azure App Service  
         run:
           echo "Deploying to Azure App Service"
           az webapp deploy \
-            --resource-group Development-RG \
-            --name WebApp-CICD-Agile \
-            --src-path . \
-            --type zip \
-            --restart true
+            --resource-group Development-RG --name WebApp-CICD-Agile --src-path webapp.zip --type zip --restart true
