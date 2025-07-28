@@ -53,9 +53,22 @@ jobs:
           # If AZURE_CREDENTIALS was a Service Principal JSON, you can keep it,
           # but OIDC is preferred for GitHub Actions.
 
-      - name: Extract tar file
-        run:
-          tar -xzvf downloaded/webapp-*.tar.gz
+      # ... other steps like Azure login, gh download ...
+
+      - name: Extract webapp artifact
+        run: tar -xzvf downloaded/webapp-*.tar.gz
+
+      - name: Debug: List extracted contents
+        run: ls -la # <--- ADD THIS STEP
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'WebApp-CICD-Agile'
+          slot-name: 'production'
+          package: '.' # Keep this as '.' for now if you think files extract directly
+          # OR if using az cli directly:
+          # src-path: .    
 
       - name: Zip for Azure
         run: zip -r webapp.zip . # This creates webapp.zip in the current directory
