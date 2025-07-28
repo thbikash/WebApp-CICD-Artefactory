@@ -58,7 +58,7 @@ jobs:
       - name: Extract webapp artifact
         run: tar -xzvf downloaded/webapp-*.tar.gz
 
-      - name: Debug: List extracted contents
+      - name: List extracted contents
         run: ls -la # <--- ADD THIS STEP
 
       - name: Deploy to Azure Web App
